@@ -1,0 +1,286 @@
+\documentclass[12pt,a4paper]{scrartcl} 
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{graphicx}
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools} % It`s AMS
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			\large
+			МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ
+			
+			Федеральное государственное бюджетное образовательное учреждение высшего образования
+			
+			\textbf{АДЫГЕЙСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ}
+			\vspace{0.25cm}
+			
+			Инженерно-физический факультет
+			
+			Кафедра автоматизированных систем обработки информации и управления
+			\vfill
+                         \vfill 
+                          
+                         \textsc{Отчет по практике}\\[5mm] 
+                          
+                         {\LARGE \textit{Написать программу Обход графа в глубину и ширину. Вариант 8 .}} 
+                         \bigskip 
+                          
+                         2 курс, группа 2ИВТ2 
+                 \end{center} 
+                 \vfill 
+                  
+                 \newlength{\ML} 
+                 \settowidth{\ML}{«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}}} 
+                 \hfill\begin{minipage}{0.5\textwidth} 
+                         Выполнили:\\ 
+                         
+                         \underline{\hspace{\ML}} А.\,Ю.~Коваленко\\
+                      
+                         «\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}} 2023 г. 
+                 \end{minipage}% 
+                 \bigskip 
+                  
+                 \hfill\begin{minipage}{0.5\textwidth} 
+                         Руководитель:\\ 
+                         \underline{\hspace{\ML}} С.\,В.~Теплоухов\\ 
+                         «\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}} 2023 г. 
+                 \end{minipage}% 
+                 \vfill 
+ 
+                  
+\begin{center} 
+Майкоп, 2023 г. 
+\end{center} 
+\end{titlepage} 
+
+
+
+\section  { Введение}
+\label{sec:intro}
+
+% Что должно быть во введении
+\item 1.1 Обход графа в ширину
+\item 1.2 Код данной задачи
+\item 1.3 Скриншот программы обхода графа в ширину
+\item 1.4 Обход графа в глубину
+\item 1.5 Код данной задачи
+\item 1.6 Скриншот программы обхода графа в глубину
+
+\subsection {Обход графа в ширину}
+\item Теория
+\item Поиск в ширину работает путём последовательного просмотра отдельных
+\item уровней графа, начиная с узла-источника.
+\item Рассмотрим все рёбра , выходящие из узла. Если очередной узел
+\item является целевым узлом, то поиск завершается; в противном случае узел
+\item добавляется в очередь. После того, как будут проверены все рёбра, выходящие из узла, из очереди извлекается следующий узел, и процесс повторяется.
+\item Работа алгоритма
+\item 1. Неформальное описание 
+\item 2. Поместить узел, с которого начинается поиск, в изначально пустую очередь.
+\item • Извлечь из начала очереди узел и пометить его как развёрнутый.
+\item • Если узел является целевым узлом, то завершить поиск с результатом «успех».
+\item В противном случае, в конец очереди добавляются все преемники узла, которые ещё не развёрнуты и не находятся в очереди.
+\item 3. Если очередь пуста, то все узлы связного графа были просмотрены, следовательно, целевой узел недостижим из начального; завершить поиск с результатом «неудача».
+
+
+\subsection{Код приложения}
+
+\begin{verbatim}
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>> graph;
+vector<bool> visited;
+
+bool bfs(int startNode, int targetNode) {
+    queue<int> q;
+
+    q.push(startNode);
+    visited[startNode] = true;
+
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+
+        if (node == targetNode) {
+            return true; // Целевой узел достигнут, поиск успешен
+        }
+
+        for (int neighbor : graph[node]) {
+            if (!visited[neighbor]) {
+                q.push(neighbor);
+                visited[neighbor] = true;
+            }
+        }
+    }
+
+    return false; // Очередь пуста, целевой узел недостижим, поиск неудачен
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    // Пример графа в виде списка смежности
+    int numNodes, numEdges;
+    cout << "Введите количество вершин: ";
+    cin >> numNodes;
+    cout << "Введите количество ребер: ";
+    cin >> numEdges;
+
+    // Инициализация графа и массива посещенных вершин
+    graph.resize(numNodes);
+    visited.resize(numNodes, false);
+
+    // Ввод ребер
+    cout << "Введите ребра (вершина1 вершина2):" << endl;
+    for (int i = 0; i < numEdges; i++) {
+        int node1, node2;
+        cin >> node1 >> node2;
+
+        // Добавление ребер в список смежности
+        graph[node1].push_back(node2);
+        graph[node2].push_back(node1);
+    }
+
+    int startNode, targetNode;
+    cout << "Введите начальную вершину: ";
+    cin >> startNode;
+    cout << "Введите целевую вершину: ";
+    cin >> targetNode;
+
+    // Выполнение обхода в ширину, начиная с начальной вершины, и проверка достижимости целевой вершины
+    if (bfs(startNode, targetNode)) {
+        cout << "Целевая вершина достижима." << endl;
+    }
+    else {
+        cout << "Целевая вершина недостижима." << endl;
+    }
+
+    return 0;
+}
+\end{verbatim}
+
+\subsection{Скриншот программы обхода графа в ширину}
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{В ширину.png}
+\caption{ В ширину}\label{fig:par}
+\end{figure}
+\newpage
+\subsection{Обход графа в глубину}
+\item Теория
+\item Стратегия поиска в глубину, как и следует из названия, состоит в том,
+чтобы идти «вглубь» графа, насколько это возможно. Алгоритм поиска
+описывается рекурсивно: перебираем все исходящие из рассматриваемой
+вершины рёбра. Если ребро ведёт в вершину, которая не была рассмотрена
+ранее, то запускаем алгоритм от этой нерассмотренной вершины, а после
+возвращаемся и продолжаем перебирать рёбра. Возврат происходит в том
+случае, если в рассматриваемой вершине не осталось рёбер, которые ведут в
+нерассмотренную вершину. Если после завершения алгоритма не все вершины были рассмотрены, то необходимо запустить алгоритм от одной из
+нерассмотренных вершин.
+\item Работа алгоритма
+\item Пусть задан граф G = (V, E), где V — множество вершин графа, E — множество ребер графа. Предположим, что в начальный момент времени все вершины графа окрашены в белый цвет. Выполним следующие действия:
+\item Пройдём по всем вершинам u ∈ V
+\item Если вершина белая, выполним для неё DFS(v).
+\item Процедура DFS (параметр — вершина)
+\item 1. Перекрашиваем вершину u в серый цвет.
+\item 2. Для всякой вершины w, смежной с вершиной u и окрашенной в белый цвет, рекурсивно выполняем процедуру DFS(w).
+\item 3. Перекрашиваем вершину u в чёрный цвет.
+\item Часто используют двухцветные метки — без серого, на 1-м шаге красят сразу в чёрный цвет.
+
+
+\subsection{Код приложения}
+
+\begin{verbatim}
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>> graph;
+vector<bool> used;
+
+void dfs(int node_index) {
+    used[node_index] = true; // Помечаем текущую вершину как посещенную (черную)
+
+    // Проходимся по всем смежным вершинам
+    for (int i = 0; i < graph[node_index].size(); ++i) {
+        int neighbor = graph[node_index][i];
+        if (!used[neighbor]) { // Если смежная вершина не была посещена (неокрашена)
+            dfs(neighbor); // Рекурсивно вызываем dfs для нее
+        }
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    int numNodes, numEdges;
+    cout << "Введите количество вершин: ";
+    cin >> numNodes;
+    cout << "Введите количество ребер: ";
+    cin >> numEdges;
+
+    // Инициализация графа и массива посещенных вершин
+    graph.resize(numNodes);
+    used.resize(numNodes, false);
+
+    // Ввод ребер
+    cout << "Введите ребра (вершина1 вершина2):" << endl;
+    for (int i = 0; i < numEdges; i++) {
+        int node1, node2;
+        cin >> node1 >> node2;
+
+        // Добавление ребер в список смежности
+        graph[node1].push_back(node2);
+        graph[node2].push_back(node1);
+    }
+
+    int startNode;
+    cout << "Введите начальную вершину: ";
+    cin >> startNode;
+
+    // Выполнение обхода графа в глубину, начиная с начальной вершины
+    dfs(startNode);
+
+    // Вывод посещенных вершин
+    cout << "Посещенные вершины:" << endl;
+    for (int i = 0; i < numNodes; i++) {
+        if (used[i]) {
+            cout << i << endl;
+        }
+    }
+
+    return 0;
+}
+
+
+
+\end{verbatim}
+\item 
+\item
+\item
+\item
+\subsection{Скриншот программы обхода графа в глубину}
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{В глубину.png}
+\caption{ В глубину}\label{fig:par}
+\end{figure}
+
+\newpage
+
+\section{ библиографические ссылки}
+
+Для изучения «внутренностей» \TeX{} необходимо
+изучить~\cite{Knuth-2003}, а для использования \LaTeX{} лучше
+почитать~\cite{Lvovsky-2003, Voroncov-2005}.
+
+\begin{thebibliography}{9}
+\bibitem{Knuth-2003}Кнут Д.Э. Всё про \TeX. \newblock —- Москва: Изд. Вильямс, 2003 г. 550~с.
+\bibitem{Lvovsky-2003}Львовский С.М. Набор и верстка в системе \LaTeX{}. \newblock —- 3-е издание, исправленное и дополненное, 2003 г.
+\bibitem{Voroncov-2005}Воронцов К.В. \LaTeX{} в примерах. 2005 г.
+\end{thebibliography}
+\end {document} 
